@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Cor de fundo da barra de ação -->
+        <item name="colorPrimary">@color/black</item>
+        <item name="colorPrimaryDark">@color/darkGray</item>
+        <item name="colorAccent">#111111</item>
+    </style>
+</resources>
+
+
