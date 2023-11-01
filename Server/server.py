@@ -1,43 +1,61 @@
-import ctypes, subprocess, socket
+import ctypes, subprocess, socket, webbrowser, qrcode
+from testes import *
 
-sSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 6)
 
-sSocket.bind(('IPV4 PC ADDRESS', 'PORT'))
+server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+ip_address = socket.gethostbyname(socket.gethostname())
 
-sSocket.listen(1)
+# qr_code = qrcode.QRCode(
+#     version=2,
+#     error_correction=qrcode.constants.ERROR_CORRECT_L,
+#     box_size=10,
+#     border=2,
+# )
+# qr_code.add_data(ip_address)
 
-print("Server is listening for connections...")
+# img = qr_code.make_image(fill_color="black", back_color="white")
+# img.save("ipv4_qr.png")
+# img.show()
+
+server_socket.bind((ip_address, 4000))
+server_socket.listen(5)
+
+print(f"{socket.gethostname()} is listening for connections...")
 
 while True:
-    cSocket, cAddress = sSocket.accept()
+    client_socket, client_address = server_socket.accept()
 
-    if cAddress[0] == "PHONE ADDRESS":
-        print(f"Accepted connection from {cAddress}")
+    if client_address[0] == "xxx.xxx.xxx.x":
+        print(f"Accepted connection from {client_address[0]}")
 
-        data = cSocket.recv(256)
+        data = client_socket.recv(1024)
         print(f"Received from client: {data.decode()}")
+        command = str(data.decode()).strip()
 
-        if data.decode() == "Bloquear":
-            ctypes.windll.user32.LockWorkStation()  
+        if command == "Bloquear":
+            ctypes.windll.user32.LockWorkStation()
 
-        elif data.decode() == "Desligar":
-            EWX_SHUTDOWN = 0x00000001
-            EWX_FORCE = 0x00000004
-            ctypes.windll.user32.ExitWindowsEx(EWX_SHUTDOWN | EWX_FORCE, 0)
+        elif command == "Desligar":
+            subprocess.call(["shutdown", "/s", "/t", "0"])
+            
+        elif command == "Spotify":
+            subprocess.run('spotify', shell=True)
 
-        elif data.decode() == "Spotify":
-            subprocess.run('spotify.exe', shell=True)
+        elif command == "VS Code":
+            subprocess.run('code', shell=True)
 
-        elif data.decode() == "Play/Pause":
-            ctypes.windll.user32.keybd_event(0xB3, 0, 0, 0)
-            ctypes.windll.user32.keybd_event(0xB3, 0, 2, 0)
+        elif command == "YouTube":
+            webbrowser.open("https://www.youtube.com")
 
-        elif data.decode() == "Anterior":
-            ctypes.windll.user32.keybd_event(0xB1, 0, 0, 0)
-            ctypes.windll.user32.keybd_event(0xB1, 0, 2, 0)
+        elif command == "Próximo" or command == "Anterior" or command == "Enter" or command == "Play/Pause":
+            atalho(command)
 
-        elif data.decode() == "Próximo":
-            ctypes.windll.user32.keybd_event(0xB0, 0, 0, 0)
-            ctypes.windll.user32.keybd_event(0xB0, 0, 2, 0)
+        elif "+" in command:
+            keys = command.split(' + ')
+            print(keys)
+            atalho(keys[0], keys[1])
 
-        cSocket.close()
+    # message = f"{data.decode()}: {'Concluido' if stts else 'Erro'}"
+    # client_socket.close()
+    
